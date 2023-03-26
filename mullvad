@@ -105,8 +105,8 @@ kill_switch() {
 	[[ $2 == all ]] && set "$1" "$AVAILABLE_SERVERS"
 	for ARG in ${2}; do
 		#Check if valid syntax
-		[[ ! $ARG =~ ^([a-z]{2}[0-9]{1,2})$ ]] && \
-                    echo -e "${RED}Error: invalid input $ARG.${NC}" && continue
+		#[[ ! $ARG =~ ^([a-z]{2}[0-9]{1,2})$ ]] && \
+                #    echo -e "${RED}Error: invalid input $ARG.${NC}" && continue
 
 		#Security check, see kill_switch_verify function above
 		if [[ "${CURRENT_CONNECTION//*-/}" == "$ARG" ]]; then
