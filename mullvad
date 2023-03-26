@@ -24,7 +24,7 @@ startup() {
 	if [[ $OPTION == "on" ]]; then
 		[[ $ENABLED != enabled ]] || \
                     error "Start-up server already set to: $START_UP"
-		echo -e '#!'"/bin/bash\nwg-quick up mullvad-$TARGET\nexit 0\n$TARGET" \
+		echo -e '#!'"/bin/bash\nwg-quick up $TARGET\nexit 0\n$TARGET" \
                     | sudo tee $SCRIPT  > /dev/null
         sudo chmod +x $SCRIPT
 
@@ -117,7 +117,7 @@ kill_switch() {
 
 		if grep -q "$ARG" <<<"$AVAILABLE_SERVERS"; then
 			#always remove the kill-switch
-			sourceFile="/etc/wireguard/mullvad-$ARG.conf"
+			sourceFile="/etc/wireguard/$ARG.conf"
 			umask 077
 			sudo awk '!/REJECT/' "$sourceFile" &>"/tmp/$ARG.tmp"
 			sudo mv "/tmp/$ARG.tmp" "$sourceFile"
@@ -147,7 +147,7 @@ case $COMMAND in
 connect)
 	#Default server check
 	[[ -z "$DEFAULT_SERVER" ]] && echo -e "${RED}Error: Default server needs to be set.${NC}" && update_default
-	TARGET_SERVER=mullvad-${2:-$DEFAULT_SERVER}
+	TARGET_SERVER=${2:-$DEFAULT_SERVER}
 
 	echo "# Connecting to ${TARGET_SERVER//*-/} #"
 	[[ $CURRENT_CONNECTION != $TARGET_SERVER ]] || error "already connected to ${TARGET_SERVER//*-/}."
@@ -219,6 +219,12 @@ update)
 		sort --version-sort /tmp/ms.txt > $CONFDIR/mullvad_servers.txt
 		rm /tmp/ms.txt ./mullvad-wg.sh
 		"$0" list
+
+		# Fix issue with interfaces over 15 characters (just removes the mullvad- prefix)
+		for i in $(sudo ls /etc/wireguard | grep 'mullvad-') 
+		do
+		    sudo mv "/etc/wireguard/$i" "/etc/wireguard/${i/*mullvad-/}"
+		done
 
 	else
 		error "unknown command, use '$(basename "$0") help' for help."
