@@ -48,7 +48,7 @@ verify_connection() {
 	local TARGET
 	echo "# Verifying connection #"
 	TARGET=$(curl -s https://am.i.mullvad.net/json | jq -r .mullvad_exit_ip_hostname)
-	[[ "${TARGET//-*/}" == "${CURRENT_CONNECTION//*-/}" ]] || error "NOT able to verify!"
+	[[ "$TARGET" == "$CURRENT_CONNECTION" ]] || error "NOT able to verify!"
 	echo -e "${GREEN}Connection verified!${NC}"
 }
 
